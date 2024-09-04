@@ -1,6 +1,7 @@
 package com.constructionxpert.ressource_service.service;
 
 import com.constructionxpert.ressource_service.exception.ResourceNotFoundException;
+import com.constructionxpert.ressource_service.feignClient.TaskClient;
 import com.constructionxpert.ressource_service.model.Resource;
 import com.constructionxpert.ressource_service.repository.ResourceRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,9 +14,10 @@ import java.util.List;
 public class RessourceService {
 
     private final ResourceRepository resourceRepository;
-    private static final String projectServiceUrl = "http://tache-service/api/tasks/";
+    private final TaskClient taskClient;
 
     public Resource createResource(Resource resource) {
+        taskClient.getTaskId(resource.getTaskId());
         return resourceRepository.save(resource);
     }
 
@@ -31,6 +33,8 @@ public class RessourceService {
     public Resource updateResource(Long id, Resource resourceDetails) throws ResourceNotFoundException {
         Resource resource = resourceRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id));
+
+        taskClient.getTaskId(resourceDetails.getTaskId());
 
         resource.setName(resourceDetails.getName());
         resource.setType(resourceDetails.getType());
