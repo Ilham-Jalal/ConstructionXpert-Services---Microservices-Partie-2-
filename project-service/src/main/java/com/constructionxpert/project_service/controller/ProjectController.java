@@ -5,6 +5,7 @@ import com.constructionxpert.project_service.model.Project;
 import com.constructionxpert.project_service.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,11 +16,13 @@ public class ProjectController {
     @Autowired
     private ProjectService projectService;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public Project createProject(@RequestBody Project project) {
         return projectService.createProject(project);
     }
 
+    @PreAuthorize("hasRole('USER')")
     @GetMapping
     public List<Project> getAllProjects() {
         return projectService.getAllProjects();

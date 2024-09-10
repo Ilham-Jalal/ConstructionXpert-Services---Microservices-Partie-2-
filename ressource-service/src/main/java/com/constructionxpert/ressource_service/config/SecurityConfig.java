@@ -1,4 +1,4 @@
-package com.constructionxpert.project_service.config;
+package com.constructionxpert.ressource_service.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,7 +21,7 @@ public class SecurityConfig  {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(expressionInterceptUrlRegistry ->
                         expressionInterceptUrlRegistry
-                                .requestMatchers("/api/projects/**").hasRole("USER")
+                                .requestMatchers("/api/resources/**").hasRole("USER")
                                 .anyRequest().authenticated()
 
                 )

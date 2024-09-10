@@ -15,24 +15,26 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private final UserDetailsServiceImpl userDetailsService;
 
-    private final JwtAuthorizationFilter jwtAuthorizationFilter;
-
-    public SecurityConfig(UserDetailsServiceImpl userDetailsService, JwtAuthorizationFilter jwtAuthorizationFilter, UserRepository userRepository) {
-        this.jwtAuthorizationFilter = jwtAuthorizationFilter;
+    public SecurityConfig(UserDetailsServiceImpl userDetailsService) {
+        this.userDetailsService = userDetailsService;
     }
 
-
+    @Bean
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthorizationFilter jwtAuthorizationFilter) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
@@ -44,12 +46,15 @@ public class SecurityConfig {
         return http.build();
     }
 
-//    @Bean
-//    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-//        AuthenticationManagerBuilder authManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
-//        authManagerBuilder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
-//        return authManagerBuilder.build();
-//    }
+    @Bean
+    public JwtAuthorizationFilter jwtAuthorizationFilter(UserDetailsService userDetailsService) {
+        return new JwtAuthorizationFilter(userDetailsService);
+    }
 
-
+    @Bean
+    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+        AuthenticationManagerBuilder authManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
+        authManagerBuilder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
+        return authManagerBuilder.build();
+    }
 }
